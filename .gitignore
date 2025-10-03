@@ -1,0 +1,273 @@
+﻿################################################################################
+# Visual Studio / .NET standard ignores
+################################################################################
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug*/
+[Rr]elease*/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild/
+[Bb]uild[Ll]og.*
+[Ll]ite[Dd]b/
+
+# Visual Studio
+.vs/
+.VSCodeCounter/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Rider
+.idea/
+*.sln.iml
+
+# Generated files
+Generated_Code/
+*.g.cs
+*.g.i.cs
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlh
+*.tli
+*.tmp
+*.tmp_proj
+*.log
+*.tlog
+*.vspscc
+*_wpftmp.csproj
+*.pidb
+*.svclog
+*.scc
+
+# Roslyn cache
+*.ide/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+# NuGet local cache
+.nuget/
+packages/
+# Exclude build/, obj/ inside packages if you commit packages (not recommended)
+**/packages/*/build/
+**/packages/*/buildMultiTargeting/
+**/packages/*/buildTransitive/
+**/packages/*/analyzers/
+**/packages/*/native/
+*.nuget.props
+*.nuget.targets
+
+# Package restore outputs
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Dotnet tools
+.dotnet-tools.json
+
+# ASP.NET / Web
+wwwroot/dist/
+wwwroot/lib/
+node_modules/
+bower_components/
+.map
+*.bundle.js
+*.min.css
+*.min.js
+
+# Publish
+[Pp]ublish*/
+**/app.publish/
+*.pubxml
+*.pubxml.user
+
+# Azure
+PublishScripts/
+ServiceDependencies/
+ServiceFabricBackup/
+.csdef
+.cloud/
+AzureWebJobsStorage*
+
+# Entity Framework
+*_MigrationHistory/
+Migrations/
+
+# StyleCop
+StyleCopReport.xml
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# NUnit / xUnit / MSTest
+TestResult.xml
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+.coverage/
+.trx/
+*.dcov
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# Coverlet
+coverage*.json
+coverage*.xml
+coverage*.info
+lcov.info
+
+# Reports
+reports/
+ReportOutput/
+*coverage-report*/
+
+# Tools
+ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+JetBrains.ReSharper.Plugins/
+.fleet/
+
+# CodeRush
+.cr/
+
+# SonarQube
+.sonar/
+.scannerwork/
+
+# VS Code analyzers
+.analyzers/
+
+# Security / secrets
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+*.pfx
+*.key
+*.snk
+
+# Docker
+docker-compose.override.yml
+**/Dockerfile.develop
+
+# Logs
+*.log
+*.svclog
+*.trace
+trace/
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary
+~$*
+*.cache
+*.tmp
+*.bak
+*.old
+
+# T4
+*.tt.tmp
+*.tt.cs
+*.ttinclude
+*_TT.cs
+
+# Local history
+.localhistory/
+
+# Rider / IntelliJ additional
+cmake-build-*/
+out/
+
+# Python (if used in build scripts)
+__pycache__/
+*.pyc
+
+# Yarn / PNPM / NPM
+yarn-error.log
+.pnpm-debug.log
+npm-debug.log
+
+# Environment
+.env
+.env.*
+
+# Terraform (if IaC included)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Certificates
+*.cer
+*.crt
+*.der
+*.p12
+
+# Local databases
+*.mdf
+*.ldf
+*.ndf
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# JetBrains caches
+jetbrains/
+
+# Cache
+.cache/
+tmp/
+temp/
+
+# Edge tooling
+.vsconfig
+
+# Optional lock files (choose to keep if using deterministic builds)
+#packages.lock.json
+
+################################################################################
+# Project specific existing rules
+################################################################################
+
