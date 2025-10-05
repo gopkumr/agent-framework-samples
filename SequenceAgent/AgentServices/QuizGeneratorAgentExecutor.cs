@@ -2,7 +2,7 @@
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 
-namespace SequenceAgent
+namespace SequenceAgent.AgentServices
 {
     public class QuizQuestionAnswersEvent(string questionAnswers) : WorkflowEvent
     {
@@ -21,8 +21,8 @@ namespace SequenceAgent
 
         public QuizGeneratorAgentExecutor(AIAgent agent) : base(agent.Id)
         {
-            this._agent = agent;
-            this._thread = this._agent.GetNewThread();
+            _agent = agent;
+            _thread = _agent.GetNewThread();
         }
 
 
@@ -30,7 +30,7 @@ namespace SequenceAgent
         {
             var prompt = $"Content: {message}";
 
-            var response = await this._agent.RunAsync(prompt, this._thread);
+            var response = await _agent.RunAsync(prompt, _thread);
 
             await context.AddEventAsync(new QuizQuestionAnswersEvent(response.Text));
 

@@ -12,6 +12,11 @@
     <PackageReference Include="Azure.Identity" Version="1.16.0" />
     <PackageReference Include="Microsoft.Agents.AI" Version="1.0.0-preview.251001.3" />
     <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251001.3" />
+    <PackageReference Include="Spectre.Console" Version="0.51.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UI\" />
   </ItemGroup>
 
 </Project>

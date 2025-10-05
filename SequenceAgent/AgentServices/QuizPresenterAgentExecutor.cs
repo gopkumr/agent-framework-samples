@@ -2,7 +2,7 @@
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 
-namespace SequenceAgent
+namespace SequenceAgent.AgentServices
 {
     public class QuestionEvent(string question) : WorkflowEvent
     {
@@ -20,9 +20,9 @@ namespace SequenceAgent
 
         public QuizPresenterAgentExecutor(AIAgent agent) : base(agent.Id)
         {
-            this._agent = agent;
-            this._agent = agent;
-            this._thread = this._agent.GetNewThread();
+            _agent = agent;
+            _agent = agent;
+            _thread = _agent.GetNewThread();
         }
 
         public async ValueTask HandleAsync(string message, IWorkflowContext context)
@@ -36,7 +36,7 @@ namespace SequenceAgent
             else
                 prompt += "and ask the next question.";
 
-            var response = await this._agent.RunAsync(prompt, this._thread);
+            var response = await _agent.RunAsync(prompt, _thread);
             await context.AddEventAsync(new QuestionEvent(response.Text));
 
             if (_questions >= 5)
@@ -44,7 +44,7 @@ namespace SequenceAgent
                 await context.YieldOutputAsync(response.Text);
                 return;
             }
-                       
+
             _questions++;
             await context.SendMessageAsync(response.Text);
         }
@@ -55,7 +55,7 @@ namespace SequenceAgent
 
             var prompt = $"Here are the questions and answers: {message.QuestionAnswers}";
 
-            var response = await this._agent.RunAsync(prompt, this._thread);
+            var response = await _agent.RunAsync(prompt, _thread);
 
             await context.AddEventAsync(new QuestionEvent(response.Text));
 

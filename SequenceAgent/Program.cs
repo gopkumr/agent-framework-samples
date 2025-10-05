@@ -3,117 +3,97 @@ using Azure.Identity;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
-using SequenceAgent;
+using SequenceAgent.AgentServices;
+using SequenceAgent.UI;
+using Spectre.Console;
 
-string Topic = "Azure Functions runtime versions overview";
 
-Console.WriteLine("Starting Quiz Agent workflow, please enter a topic you want to learn about...");
-Topic = Console.ReadLine() ?? Topic;
-
-var endpoint = "https://gopa-racgp-poc-dev-resource.services.ai.azure.com/api/projects/gopa-racgp-poc-dev"
-    ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROJECT_ENDPOINT is not set.");
+// Initialize the chat application
+var chatUI = new ChatUI();
+var spinner = new ThinkingSpinner();
+var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROJECT_ENDPOINT") ?? "https://gopa-racgp-poc-dev-resource.services.ai.azure.com/api/projects/gopa-racgp-poc-dev";
 var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROJECT_DEPLOYMENT_NAME") ?? "gpt-4o-mini";
-var persistentAgentsClient = new PersistentAgentsClient(endpoint, new AzureCliCredential());
-
-AIAgent WebContentDownloaderAgent = await CreateFoundryAgent(deploymentName, "WebContentDownloader", """
-        - Use HostedWebSearchTool to extract readable content from the internet
-        - Strip ads, navigation, and irrelevant sections
-        - Return title and cleaned body text
-        """, persistentAgentsClient, [new HostedWebSearchTool()]);
-
-AIAgent QuizGeneratorAgent = await CreateFoundryAgent(deploymentName, "QuizGenerator", """
-        - Generate 5 factual questions based on the content
-        - Include concise answers
-        - Format as a list of Q&A pairs
-        .
-        """, persistentAgentsClient);
-AIAgent QuizPresenterAgent = await CreateFoundryAgent(deploymentName, "QuizPresenter", """
-        - Present one question at a time
-        - Wait for user input
-        - Compare user response to expected answer (basic match or semantic similarity)
-        - Provide feedback: correct/incorrect + explanation
-        - Score the quiz and summarize performance
-
-        """, persistentAgentsClient);
-
-var inputExecutor = InputPort.Create<string, string>("Answer");
-var WebContentDownloader = new WebContentDownloaderAgentExecutor(WebContentDownloaderAgent);
-var QuizGenerator = new QuizGeneratorAgentExecutor(QuizGeneratorAgent);
-var QuizPresenter = new QuizPresenterAgentExecutor(QuizPresenterAgent);
+var workflowService = new WorkflowService(endpoint);
 
 
-var workflow = new WorkflowBuilder(WebContentDownloader)
-           .AddEdge(WebContentDownloader, QuizGenerator)
-           .AddEdge(QuizGenerator, QuizPresenter)
-           .AddEdge(QuizPresenter, inputExecutor)
-           .AddEdge(inputExecutor, QuizPresenter)
-           .WithOutputFrom(QuizPresenter)
-           .Build();
+// Show welcome message
+AnsiConsole.Clear();
+UserInput.ShowWelcomeMessage();
 
-//Console.WriteLine(workflow.ToDotString());
+// Wait for user to enter the topic to start
+AnsiConsole.MarkupLine("[dim]Enter the topic to start chatting...[/]");
+var topic = Console.ReadLine();
 
-StreamingRun handle = await InProcessExecution.StreamAsync(workflow, Topic).ConfigureAwait(false);
-
-await foreach (WorkflowEvent evt in handle.WatchStreamAsync().ConfigureAwait(false))
+try
 {
-    if (evt is ContentPreparedEvent contentPreparedEvent)
+    await spinner.ShowSpinnerAsync(() => workflowService.Initialize(deploymentName), "Connecting agents 🤖 ...");
+    AnsiConsole.Clear();
+
+    // Add user message to chat
+    chatUI.AddMessage(topic, isUser: true);
+    chatUI.SetAIThinking(true, "🤖 Content Agent is generating content...");
+    chatUI.DisplayChat();
+
+    var workflow = await workflowService.CreateQuestionAnswerWorkflow();
+
+    //Console.WriteLine(workflow.ToDotString());
+
+    StreamingRun handle = await InProcessExecution.StreamAsync(workflow, topic).ConfigureAwait(false);
+
+    await foreach (WorkflowEvent evt in handle.WatchStreamAsync().ConfigureAwait(false))
     {
-        Console.WriteLine("**************** Content Agent *************************");
-        Console.Write(contentPreparedEvent.Content);
-        Console.WriteLine("\n*******************************************************\n\n");
+        if (evt is ContentPreparedEvent contentPreparedEvent)
+        {
+            chatUI.AddMessage(contentPreparedEvent.Content, isUser: false, "Content Agent");
+            chatUI.SetAIThinking(true, "🤖 Questions Agent is preparing questions...");
+            chatUI.DisplayChat();
+        }
+        else if (evt is QuizQuestionAnswersEvent questionAnswersEvent)
+        {
+            //chatUI.AddMessage(questionAnswersEvent.QuestionAnswers, isUser: false, "Questions Agent");
+            chatUI.SetAIThinking(true, "🤖 Presenter Agent is preparing to ask the first question...");
+            chatUI.DisplayChat();
+        }
+        else if (evt is QuestionEvent questionEvent)
+        {
+            chatUI.AddMessage(questionEvent.Question, isUser: false, "Presenter Agent");
+            chatUI.SetAIThinking(false);
+            chatUI.DisplayChat();
+        }
+        else if (evt is RequestInfoEvent requestInputEvt)
+        {
+            ExternalResponse response = HandleExternalRequest(requestInputEvt.Request, chatUI);
+            chatUI.DisplayChat();
+            await handle.SendResponseAsync(response).ConfigureAwait(false);
+            chatUI.SetAIThinking(true, "🤖 Presenter Agent is validating the answer...");
+            chatUI.DisplayChat();
+        }
     }
-    else if (evt is QuizQuestionAnswersEvent questionAnswersEvent)
-    {
-        Console.WriteLine("\n************** Question Answers Agent ************");
-        Console.Write(questionAnswersEvent.QuestionAnswers);
-        Console.WriteLine("\n**************************************************\n\n");
-    }
-    else if (evt is QuestionEvent questionEvent)
-    {
-        Console.WriteLine($"{questionEvent.Question}");
-    }
-    else if (evt is RequestInfoEvent requestInputEvt)
-    {
-        ExternalResponse response = HandleExternalRequest(requestInputEvt.Request);
-        await handle.SendResponseAsync(response).ConfigureAwait(false);
-    }
+
+    //Delete agents
+    await workflowService.CleanupAgents();
+
+    chatUI.AddMessage("press ENTER to exit", isUser: false, isSystem:true);
+    chatUI.DisplayChat();
+    Console.ReadLine();
+
+}
+catch (Exception ex)
+{
+    AnsiConsole.WriteException(ex);
+    AnsiConsole.MarkupLine("[red]An error occurred. Press any key to continue...[/]");
+    Console.ReadKey(true);
 }
 
-// Cleanup agents.
-await persistentAgentsClient.Administration.DeleteAgentAsync(WebContentDownloader.Id);
-await persistentAgentsClient.Administration.DeleteAgentAsync(QuizGenerator.Id);
-await persistentAgentsClient.Administration.DeleteAgentAsync(QuizPresenter.Id);
 
-Console.Write("Sample agents deleted, press ENTER to exit");
-Console.ReadLine();
-
-
-static async Task<AIAgent> CreateFoundryAgent(string deploymentName, string agentName, string agentInstructions, PersistentAgentsClient persistentAgentsClient, IList<AITool>? tools = null)
-{
-    var researcherAgentMetadata = await persistentAgentsClient.Administration.CreateAgentAsync(
-        model: deploymentName,
-        name: agentName,
-        instructions: agentInstructions);
-    var chatClient = persistentAgentsClient.AsIChatClient(researcherAgentMetadata.Value.Id);
-
-    AIAgent researcher = new ChatClientAgent(chatClient, options: new()
-    {
-        Id = researcherAgentMetadata.Value.Id,
-        Name = researcherAgentMetadata.Value.Name,
-        Description = researcherAgentMetadata.Value.Description,
-        Instructions = researcherAgentMetadata.Value.Instructions,
-        ChatOptions = new() { Tools = tools ?? [] }
-    });
-    return researcher;
-}
-
-static ExternalResponse HandleExternalRequest(ExternalRequest request)
+static ExternalResponse HandleExternalRequest(ExternalRequest request, ChatUI chatUI)
 {
     if (request.DataIs<string>())
     {
-        Console.Write($"Please provide your answer: ");
-        string? answer = Console.ReadLine();
-        return request.CreateResponse(answer);
+        var userMessage = UserInput.GetUserMessageFullWidth(chatUI);
+        chatUI.AddMessage(userMessage, isUser: true);
+        return request.CreateResponse(userMessage);
     }
     throw new NotSupportedException($"Request {request.PortInfo.RequestType} is not supported");
 }
+
