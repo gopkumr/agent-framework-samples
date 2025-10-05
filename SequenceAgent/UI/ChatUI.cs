@@ -19,7 +19,7 @@ public class ChatUI
     private bool _isAIThinking = false;
     private string _thinkingMessage = "🤖 AI is thinking...";
 
-    public void AddMessage(string content, bool isUser, string? name = null, bool isSystem=false)
+    public void AddMessage(string content, bool isUser, string? name = null, bool isSystem = false)
     {
         _messages.Add(new ChatMessage
         {

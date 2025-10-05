@@ -1,8 +1,4 @@
-﻿using Azure.AI.Agents.Persistent;
-using Azure.Identity;
-using Microsoft.Agents.AI;
-using Microsoft.Agents.AI.Workflows;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Agents.AI.Workflows;
 using SequenceAgent.AgentServices;
 using SequenceAgent.UI;
 using Spectre.Console;
@@ -73,7 +69,7 @@ try
     //Delete agents
     await workflowService.CleanupAgents();
 
-    chatUI.AddMessage("press ENTER to exit", isUser: false, isSystem:true);
+    chatUI.AddMessage("press ENTER to exit", isUser: false, isSystem: true);
     chatUI.DisplayChat();
     Console.ReadLine();
 

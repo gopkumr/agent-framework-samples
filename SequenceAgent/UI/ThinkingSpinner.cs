@@ -98,7 +98,7 @@ public class ThinkingSpinner
         return result;
     }
 
-    public async Task ShowSpinnerAsync(Func<Task> operation, string? statusMessage=null)
+    public async Task ShowSpinnerAsync(Func<Task> operation, string? statusMessage = null)
     {
         var message = statusMessage ?? _thinkingMessages[_random.Next(_thinkingMessages.Length)];
 
