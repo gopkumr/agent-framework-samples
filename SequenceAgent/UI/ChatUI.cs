@@ -45,7 +45,7 @@ public class ChatUI
         // Create a full-screen conversation layout
         var chatContent = CreateChatContent();
         var conversationPanel = new Panel(chatContent)
-            .Header("[bold yellow]🤖 AI Chat Assistant - Conversation[/]")
+            .Header("[bold yellow]🤖 AI Leaning Workflow  - Conversation[/]")
             .BorderColor(Color.Yellow)
             .Padding(1, 1)
             .Expand();
@@ -73,7 +73,7 @@ public class ChatUI
         var chatContent = CreateChatContent();
         layout["Conversation"].Update(
             new Panel(chatContent)
-                .Header("[bold yellow]🤖 AI Chat Assistant - Conversation[/]")
+                .Header("[bold yellow]🤖 AI Leaning Workflow - Conversation[/]")
                 .BorderColor(Color.Yellow)
                 .Padding(1, 1)
                 .Expand()

@@ -11,7 +11,7 @@ using Spectre.Console;
 // Initialize the chat application
 var chatUI = new ChatUI();
 var spinner = new ThinkingSpinner();
-var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROJECT_ENDPOINT") ?? "https://gopa-racgp-poc-dev-resource.services.ai.azure.com/api/projects/gopa-racgp-poc-dev";
+var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROJECT_ENDPOINT") ?? "https://[NAME].services.ai.azure.com/api/projects/[PROJECT]";
 var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROJECT_DEPLOYMENT_NAME") ?? "gpt-4o-mini";
 var workflowService = new WorkflowService(endpoint);
 
